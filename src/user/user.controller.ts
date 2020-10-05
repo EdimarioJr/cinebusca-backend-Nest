@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Param, Delete, ParseIntPipe } from '@nestjs/common'
+import { Controller, Get, Post, Body, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common'
 import { UserService } from './user.service'
 import { CreateUserDto } from './dto/create-user-dto'
 import { CreateReviewDto } from './dto/create-review-dto'
-import { User } from './interfaces/user.interface'
+import { LocalAuthGuard } from '../auth/local-auth.guard'
 
 
 @Controller('/user')
@@ -14,9 +14,12 @@ export class UserController {
     create(@Body() createUserDto: CreateUserDto) {
         return this.userService.create(createUserDto)
     }
-
+    // Quando usamos o Guard fornecido pelo passport, a rota só será executado se o usuário for validado
+    // e o parametro Req vai conter um campo user ( fornecido pelo Passport)
+    @UseGuards(LocalAuthGuard)
     @Post("/login")
     auth(@Body() createUserDto: CreateUserDto): any {
+        console.log("Chegou no route handler")
         const { name, password } = createUserDto
         return this.userService.login({ name, password })
     }
@@ -41,7 +44,7 @@ export class UserController {
     // Watchlist do Usuário
     @Get("/watchlist")
     getWatchlist(@Body() user: any): Promise<Array<string>> {
-        console.log("controller",user)
+        console.log("controller", user)
         return this.userService.getWatchlist(user.user)
     }
 

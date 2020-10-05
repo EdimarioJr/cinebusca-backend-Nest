@@ -1,5 +1,5 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
-import {FindUserMiddleware} from './finduser.middleware'
+import { FindUserMiddleware } from './finduser.middleware'
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { User, UserSchema } from './schemas/user.schema';
@@ -9,7 +9,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 // Depois disso injetamos o Repositorio User no escopo do Users Service usando o @InjectRepository()
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])
   ],
   providers: [UserService],
   controllers: [UserController],
@@ -17,10 +17,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 // Configurando o middleware finduser para ser aplicado nos route handlers das rotas especificadas
 // na função forRoutes
-export class UserModule implements NestModule{
-  configure(consumer: MiddlewareConsumer){
+export class UserModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
     consumer
-    .apply(FindUserMiddleware)
-    .forRoutes('user/watchlist', 'user/reviews')
+      .apply(FindUserMiddleware)
+      .forRoutes('user/watchlist', 'user/reviews')
   }
 }
