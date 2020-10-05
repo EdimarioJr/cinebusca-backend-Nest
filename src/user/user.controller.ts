@@ -4,40 +4,12 @@ import { CreateUserDto } from './dto/create-user-dto'
 import { CreateReviewDto } from './dto/create-review-dto'
 import { User } from './interfaces/user.interface'
 
-export const userTeste = {
-    name: "Edimário Júnior",
-    password: "teste",
-    watchlist: [123123, 22212, 3444565, 222008, 909090, 998872],
-    reviews: [
-        {
-            idMovie: 123123,
-            review: "Filme bom",
-            score: 8.5
-        },
-        {
-            idMovie: 22212,
-            review: "Filme ruim",
-            score: 3.5
-        },
-        {
-            idMovie: 3444565,
-            review: "Filme mais ou menos",
-            score: 5
-        }
-    ]
-}
-
 
 @Controller('/user')
 export class UserController {
     constructor(private userService: UserService) { }
 
     // Criação e login do usuário
-    @Get()
-    returnUsers() {
-        return userTeste
-    }
-
     @Post()
     create(@Body() createUserDto: CreateUserDto) {
         return this.userService.create(createUserDto)
@@ -45,38 +17,40 @@ export class UserController {
 
     @Post("/login")
     auth(@Body() createUserDto: CreateUserDto): any {
-        const { name, password } = userTeste
+        const { name, password } = createUserDto
         return this.userService.login({ name, password })
     }
     // Review do Usuário
     @Get('/reviews')
-    getReviews(@Body() user: User) {
-        return this.userService.getAllReviews(userTeste)
+    getReviews(@Body() idUser:string) {
+        return this.userService.getAllReviews(idUser)
     }
 
     @Post('/reviews')
-    addReview(@Body() createReviewDto: CreateReviewDto, user: User) {
-        return this.userService.createReview(userTeste, createReviewDto)
+    addReview(@Body() createReviewDto: CreateReviewDto, idUser: string) {
+        return this.userService.createReview(idUser, createReviewDto)
     }
 
     @Delete('/reviews/:id')
-    deleteReview(user: User, @Param('id', ParseIntPipe) id: number) {
-        return this.userService.deleteReview(userTeste, id)
+    deleteReview(idUser: string, @Param('id', ParseIntPipe) id: number) {
+        return this.userService.deleteReview(idUser, id)
     }
 
     // Watchlist do Usuário
     @Get("/watchlist")
-    getWatchlist(user: User): Array<number> {
-        return this.userService.getWatchlist(userTeste)
+    getWatchlist(idUser: string): Promise<Array<string>> {
+        return this.userService.getWatchlist(idUser)
     }
 
     @Post("/watchlist")
-    addWatchlist(@Body() idMovie: number, user: User) {
-        return this.userService.addMovieWatchlist(userTeste, idMovie)
+    addWatchlist(@Body() addToWatchlist: any) {
+        const {idUser,idMovie} = addToWatchlist
+        console.log(idUser,idMovie)
+        return this.userService.addMovieWatchlist(idUser, idMovie)
     }
 
     @Delete("/watchlist/:id")
-    removeMovieWatchlist(@Param('id', ParseIntPipe) id: number, user: User) {
-        return this.userService.removeMovieWatchlist(userTeste, id)
+    removeMovieWatchlist(@Param('id', ParseIntPipe) id: string, idUser: string) {
+        return this.userService.removeMovieWatchlist(idUser, id)
     }
 }
