@@ -22,35 +22,39 @@ export class UserController {
     }
     // Review do Usuário
     @Get('/reviews')
-    getReviews(@Body() idUser:string) {
-        return this.userService.getAllReviews(idUser)
+    getReviews(@Body() user: any) {
+        return this.userService.getAllReviews(user.user)
     }
 
     @Post('/reviews')
-    addReview(@Body() createReviewDto: CreateReviewDto, idUser: string) {
-        return this.userService.createReview(idUser, createReviewDto)
+    addReview(@Body() addReviewDto: any) {
+        const { user, createReviewDto } = addReviewDto
+        return this.userService.createReview(user, createReviewDto)
     }
 
-    @Delete('/reviews/:id')
-    deleteReview(idUser: string, @Param('id', ParseIntPipe) id: number) {
-        return this.userService.deleteReview(idUser, id)
+    @Delete('/reviews')
+    deleteReview(@Body() deleteReview: any) {
+        const { user, idMovie } = deleteReview
+        return this.userService.deleteReview(user, idMovie)
     }
 
     // Watchlist do Usuário
     @Get("/watchlist")
-    getWatchlist(idUser: string): Promise<Array<string>> {
-        return this.userService.getWatchlist(idUser)
+    getWatchlist(@Body() user: any): Promise<Array<string>> {
+        console.log("controller",user)
+        return this.userService.getWatchlist(user.user)
     }
 
+    // Os decorators @Body, @Param e afins aceitam uma variável (no caso do @body um objeto e no caso do @param uma primitiva)
     @Post("/watchlist")
     addWatchlist(@Body() addToWatchlist: any) {
-        const {idUser,idMovie} = addToWatchlist
-        console.log(idUser,idMovie)
-        return this.userService.addMovieWatchlist(idUser, idMovie)
+        const { user, idMovie } = addToWatchlist
+        return this.userService.addMovieWatchlist(user, idMovie)
     }
 
-    @Delete("/watchlist/:id")
-    removeMovieWatchlist(@Param('id', ParseIntPipe) id: string, idUser: string) {
-        return this.userService.removeMovieWatchlist(idUser, id)
+    @Delete("/watchlist")
+    removeMovieWatchlist(@Body() deleteMovieOnWatchlist: any) {
+        const { user, idMovie } = deleteMovieOnWatchlist
+        return this.userService.removeMovieWatchlist(user, idMovie)
     }
 }

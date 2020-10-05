@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import {FindUserMiddleware} from './finduser.middleware'
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { User, UserSchema } from './schemas/user.schema';
@@ -13,4 +14,13 @@ import { MongooseModule } from '@nestjs/mongoose';
   providers: [UserService],
   controllers: [UserController],
 })
-export class UserModule {}
+
+// Configurando o middleware finduser para ser aplicado nos route handlers das rotas especificadas
+// na função forRoutes
+export class UserModule implements NestModule{
+  configure(consumer: MiddlewareConsumer){
+    consumer
+    .apply(FindUserMiddleware)
+    .forRoutes('user/watchlist', 'user/reviews')
+  }
+}
