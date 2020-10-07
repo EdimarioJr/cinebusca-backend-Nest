@@ -16,7 +16,7 @@ export class User{
     password: string;
 
     @Prop({default: []})
-    watchlist: Array<string>;
+    watchlist: Array<number>;
 
     @Prop({default: []})
     reviews: Array<Review>;

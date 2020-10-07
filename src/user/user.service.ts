@@ -5,10 +5,12 @@ import { User, UserDocument } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-interface retornoLogin {
-  login: boolean;
+// op eh a flag que vai indicar para o front end se a operacao teve sucesso ou nao
+export interface statusOperacao{
+  op: boolean;
   message: string;
-  user: any;
+  watchlist?: Array<number>;
+  reviews?: Array<Review>
 }
 
 // Injetamos o Model no serviço através do InjectModel. Toda a manipulação de dados no BD vai ser feita
@@ -21,7 +23,7 @@ export class UserService {
     private userModel: Model<UserDocument>,
   ) {}
 
-  async create(createUser: CreateUserDto): Promise<string> {
+  async create(createUser: CreateUserDto): Promise<statusOperacao> {
     const {name, password} = createUser
     // Verificando se os dois parâmetros estão sendo mandados
     if (name && password) {
@@ -32,50 +34,105 @@ export class UserService {
       if (!(await this.userModel.findOne({ name}))) {
         const newUser = new this.userModel({ name, password });
         newUser.save();
-        return 'Usuário criado!';
-      } else return 'Esse usuário já existe!';
-    } else 'Informe um nome e uma senha!';
+        return {
+          op: true,
+          message: "Usuario criado com sucesso!"
+        }
+      } else return {
+        op: false,
+        message: "Usuario ja existe!"
+      };
+    } else return {
+      op: false,
+      message: "Informe um nome e uma senha!"
+    };
   }
 
   async getByName(name: string): Promise<any> { 
     return await this.userModel.findOne({ name });
   }
 
-  async createReview(user: any, reviewRequest: Review): Promise<string> {
-    const { idMovie, review, score, date } = reviewRequest;
-    const indexReview = user.reviews.findIndex(
-      reviewUser => reviewUser.idMovie === idMovie,
-    );
-    // Caso já exista uma review pra esse filme, atualizar
-    if (indexReview !== -1) {
-      user.reviews[indexReview] = {
-        idMovie,
-        review,
-        score,
-        date,
-      };
-      await user.save();
-      return 'Review Atualizado!';
+  async createReview(user: any, reviewRequest: Review): Promise<statusOperacao> {
+    if(user){
+      const { idMovie, review, score} = reviewRequest;
+      // Conferindo se os parametros necessarios sao nao nulos ou strings vazias
+        const indexReview = user.reviews.findIndex(
+          reviewUser => reviewUser.idMovie === idMovie,
+        );
+        // Caso já exista uma review pra esse filme, atualizar
+        if (indexReview !== -1) {
+          user.reviews[indexReview] = {
+            idMovie,
+            review,
+            score,
+            date : new Date()
+          };
+          await user.save();
+          return {
+            op: true,
+            message: "Review atualizado!"
+          };
+        } else {
+          // Caso o review do filme não exista, criar um novo
+          user.reviews.push({
+            idMovie,
+            review,
+            score,
+            date: new Date(),
+          });
+          await user.save();
+          return {
+            op: true,
+            message: "Review criado com sucesso!"
+          }
+      }
     } else {
-      // Caso o review do filme não exista, criar um novo
-      user.reviews.push({
-        idMovie,
-        review,
-        score,
-        date,
-      });
-      await user.save();
-      return 'Review Criado!';
+      return {
+        op: false,
+        message: "Usuario inexistente"
+      }
+    }
+   
+  }
+
+  async updateReview(user: any, idMovie: number, newReview: string): Promise<statusOperacao>{
+    if(user){
+      const indexMovie = user.reviews.findIndex( movie => movie.idMovie === idMovie)
+      if(indexMovie !== -1){
+        user.reviews[indexMovie].review = newReview
+        user.reviews[indexMovie].date = new Date()
+        await user.save()
+        return {
+          op: true,
+          message: "Review atualizada com sucesso!"
+        }
+      } else {
+        return {
+          op: false,
+          message: "Esse filme nao existe em suas reviews!"
+        }
+      }
+    } else return {
+      op: false,
+      message: "Usuario inexistente ou nao autenticado!"
+    }
+   
+  }
+
+  async getAllReviews(user: User): Promise<statusOperacao> {
+    if (user) {
+      return {
+        op: true,
+        message: "Reviews retornados com sucesso!",
+        reviews: user.reviews
+      }
+    } else return {
+      op: false,
+      message: "Usuario inexistente!"
     }
   }
 
-  async getAllReviews(user: User): Promise<any> {
-    if (user) {
-      return user.reviews;
-    } else return 'Usuário não existe!';
-  }
-
-  async deleteReview(user: any, idMovieReview: number): Promise<string> {
+  async deleteReview(user: any, idMovieReview: number): Promise<statusOperacao> {
     if (user) {
       const indexReview = user.reviews.findIndex(
         review => review.idMovie === idMovieReview,
@@ -83,34 +140,59 @@ export class UserService {
       if (indexReview !== -1) {
         user.reviews.splice(indexReview, 1);
         await user.save();
-        return 'Review removido com sucesso!';
-      } else return 'Review Inexistente para esse usuário!';
-    } else return 'Usuário Inexistente';
+        return {
+          op: true,
+          message: "Review removido com sucesso"
+        };
+      } else return {
+        op: false,
+        message: " Review inexistente para esse usuario!"
+      };
+    } else return {
+      op: false,
+      message: "Usuario inexistente!"
+    }
   }
 
-  async getWatchlist(user: User): Promise<any> {
-    if (user) return user.watchlist;
-    else return 'Esse usuário não existe!';
+  async getWatchlist(user: User): Promise<statusOperacao> {
+    if (user) return {
+      op: true,
+      message: "Watchlist retornada!",
+      watchlist: user.watchlist
+    };
+    else return {
+      op: false,
+      message: "Usuario inexistente!"
+    };
   }
 
-  async addMovieWatchlist(user: any, idMovie: string): Promise<string> {
+  async addMovieWatchlist(user: any, idMovie: number): Promise<statusOperacao> {
     if (user) {
       // Se o filme já existe na watchlist, não faz nada
-      if (user.watchlist.find((movie: string) => movie === idMovie))
-        return 'Filme já está na watchlist!';
+      if (user.watchlist.find((movie: number) => movie === idMovie))
+        return {
+          op: false,
+          message: "Filme ja esta na watchlist!"
+        }
       else {
         // Caso o filme não exista, adiciona no array e salva
         user.watchlist.push(idMovie);
         await user.save();
-        return 'Filme adicionado a watchlist!';
+        return {
+          op: true,
+          message: "Filme adicionad a watchlist"
+        }
       }
-    } else return 'Usuário Não Existe!';
+    } else return {
+      op: false,
+      message: "Usuario inexistente!"
+    };
   }
 
-  async removeMovieWatchlist(user: any, idMovie: string): Promise<string> {
+  async removeMovieWatchlist(user: any, idMovie: number): Promise<statusOperacao> {
     if (user) {
       // Procura o index do filme no array watchlist
-      const indexMovieWatchlist = user.watchlist.findIndex((movie: string) => {
+      const indexMovieWatchlist = user.watchlist.findIndex((movie: number) => {
         return movie == idMovie;
       });
       if (indexMovieWatchlist !== -1) {
@@ -119,10 +201,19 @@ export class UserService {
         console.log(user.watchlist);
         // salva as atualizações no BD
         await user.save();
-        return 'Filme retirado da watchlist!';
+        return {
+          op: true,
+          message: "Filme retirado da watchlist!"
+        };
       } else {
-        return 'Esse filme não está na watchlist';
+        return {
+          op: false,
+          message: "Esse filme nao esta na sua watchlist!"
+        };
       }
-    } else return 'Usuário não existe';
+    } else return {
+      op: false,
+      message: "Usuario inexistente"
+    };
   }
 }

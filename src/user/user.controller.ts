@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Body, Request,Param, Delete, ParseIntPipe, UseGuards, Req } from '@nestjs/common'
+import { Controller, Get, Post, Body, Request,Param, Delete, ParseIntPipe, UseGuards, Put } from '@nestjs/common'
 import { UserService } from './user.service'
 import { CreateUserDto } from './dto/create-user-dto'
 import {LocalAuthGuard} from '../auth/local-auth.guard'
 import {JwtAuthGuard} from "../auth/jwt-auth.guard"
 import {AuthService} from "../auth/auth.service"
 import { CreateReviewDto } from './dto/create-review-dto'
+import {UpdateReviewDto} from "./dto/update-review-dto"
+import {statusOperacao} from "./user.service"
+
 
 @Controller('/user')
 export class UserController {
@@ -12,7 +15,7 @@ export class UserController {
 
     // Criação e login do usuário
     @Post()
-    create(@Body() createUserDto: CreateUserDto) {
+    create(@Body() createUserDto: CreateUserDto): Promise<statusOperacao> {
         return this.userService.create(createUserDto)
     }
 
@@ -33,21 +36,27 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     // Review do Usuário
     @Get('/reviews')
-    getReviews(@Request() req: any) {
+    getReviews(@Request() req: any) : Promise<statusOperacao>{
         return this.userService.getAllReviews(req.user)
     }
 
 
     @UseGuards(JwtAuthGuard)
     @Post('/reviews')
-    addReview(@Body() createReviewDto: CreateReviewDto, @Request() req) {
+    addReview(@Body() createReviewDto: CreateReviewDto, @Request() req) : Promise<statusOperacao>{
         return this.userService.createReview(req.user, createReviewDto)
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Put('/reviews')
+    updateReview(@Request() req, @Body() updateReviewDto: UpdateReviewDto): Promise<statusOperacao>{
+        const {idMovie, review} = updateReviewDto
+        return  this.userService.updateReview(req.user, idMovie, review)
+    }
 
     @UseGuards(JwtAuthGuard)
     @Delete('/reviews/:id')
-    deleteReview(@Request() req, @Param("id", ParseIntPipe) id: any) {
+    deleteReview(@Request() req, @Param("id", ParseIntPipe) id: any) : Promise<statusOperacao>{
         return this.userService.deleteReview(req.user, id)
     }
 
@@ -55,23 +64,23 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     // Watchlist do Usuário
     @Get("/watchlist")
-    getWatchlist(@Request() req): Promise<Array<string>> {
+    getWatchlist(@Request() req): Promise<statusOperacao> {
         return this.userService.getWatchlist(req.user)
     }
 
 
     @UseGuards(JwtAuthGuard)
     // Os decorators @Body, @Param e afins aceitam uma variável (no caso do @body um objeto e no caso do @param uma primitiva)
-    @Post("/watchlist/:id")
-    addWatchlist(@Request() req, @Param("id", ParseIntPipe) id) {
-        return this.userService.addMovieWatchlist(req.user, id)
+    @Post("/watchlist")
+    addWatchlist(@Request() req, @Body() id: any): any {
+        const {idMovie} = id
+        return this.userService.addMovieWatchlist(req.user, idMovie)
     }
 
 
     @UseGuards(JwtAuthGuard)
     @Delete("/watchlist/:id")
-    removeMovieWatchlist(@Request() req, @Param("id", ParseIntPipe) id: any) {
-        console.log(req.user,id)
+    removeMovieWatchlist(@Request() req, @Param("id", ParseIntPipe) id: any):Promise<statusOperacao> {
         return this.userService.removeMovieWatchlist(req.user, id)
     }
 }
