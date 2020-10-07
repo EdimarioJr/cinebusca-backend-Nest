@@ -8,6 +8,7 @@ import { Model } from 'mongoose';
 interface retornoLogin {
   login: boolean;
   message: string;
+  user: any;
 }
 
 // Injetamos o Model no serviço através do InjectModel. Toda a manipulação de dados no BD vai ser feita
@@ -21,8 +22,7 @@ export class UserService {
   ) {}
 
   async create(createUser: CreateUserDto): Promise<string> {
-    const { password } = createUser;
-    const name = createUser.username
+    const {name, password} = createUser
     // Verificando se os dois parâmetros estão sendo mandados
     if (name && password) {
       /*
@@ -39,15 +39,6 @@ export class UserService {
 
   async getByName(name: string): Promise<any> { 
     return await this.userModel.findOne({ name });
-  }
-
-  async login(): Promise<retornoLogin> {
-    // Se essa funcao for chamada, significa que o usuario foi validado com sucesso pelo passport, portanto seu username e password estao corretos.
-    return {
-      login: true,
-      message: "Acesso garantido!"
-    }
-   
   }
 
   async createReview(user: any, reviewRequest: Review): Promise<string> {
@@ -78,7 +69,7 @@ export class UserService {
     }
   }
 
-  async getAllReviews(user: any): Promise<any> {
+  async getAllReviews(user: User): Promise<any> {
     if (user) {
       return user.reviews;
     } else return 'Usuário não existe!';
@@ -97,7 +88,7 @@ export class UserService {
     } else return 'Usuário Inexistente';
   }
 
-  async getWatchlist(user: any): Promise<any> {
+  async getWatchlist(user: User): Promise<any> {
     if (user) return user.watchlist;
     else return 'Esse usuário não existe!';
   }
