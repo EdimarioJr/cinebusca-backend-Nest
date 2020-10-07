@@ -13,6 +13,7 @@ import { MongooseModule } from '@nestjs/mongoose';
   ],
   providers: [UserService],
   controllers: [UserController],
+  exports: [UserService]
 })
 
 // Configurando o middleware finduser para ser aplicado nos route handlers das rotas especificadas
