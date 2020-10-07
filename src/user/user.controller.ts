@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, Delete, ParseIntPipe, UseGuards } f
 import { UserService } from './user.service'
 import { CreateUserDto } from './dto/create-user-dto'
 import { CreateReviewDto } from './dto/create-review-dto'
-import { AuthGuard } from '@nestjs/passport';
+import {LocalAuthGuard} from '../auth/local-auth.guard'
 
 @Controller('/user')
 export class UserController {
@@ -15,12 +15,11 @@ export class UserController {
     }
     // Quando usamos o Guard fornecido pelo passport, a rota só será executado se o usuário for validado
     // e o parametro Req vai conter um campo user ( fornecido pelo Passport)
-    @UseGuards(AuthGuard('local'))
+    @UseGuards(LocalAuthGuard)
     @Post("/login")
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     auth(@Body() createUserDto: CreateUserDto): any {
-        console.log("Chegou no route handler")
-        const { name, password } = createUserDto
-        return this.userService.login({ name, password })
+        return this.userService.login()
     }
     // Review do Usuário
     @Get('/reviews')

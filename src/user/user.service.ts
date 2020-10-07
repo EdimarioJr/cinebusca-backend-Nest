@@ -21,51 +21,38 @@ export class UserService {
   ) {}
 
   async create(createUser: CreateUserDto): Promise<string> {
-    const { name, password } = createUser;
+    const { password } = createUser;
+    const name = createUser.username
     // Verificando se os dois parâmetros estão sendo mandados
     if (name && password) {
       /*
       Verificando se o usuário não existe
        Se o findOne acha algo, ele retorna o documento que corresponde a query, caso contrário retorna null 
        */
-      if (!(await this.userModel.findOne({ name }))) {
-        let newUser = new this.userModel({ name, password });
+      if (!(await this.userModel.findOne({ name}))) {
+        const newUser = new this.userModel({ name, password });
         newUser.save();
         return 'Usuário criado!';
       } else return 'Esse usuário já existe!';
     } else 'Informe um nome e uma senha!';
   }
 
-  async getByName(name: string): Promise<any> {
+  async getByName(name: string): Promise<any> { 
     return await this.userModel.findOne({ name });
   }
 
-  async login(createUser: CreateUserDto): Promise<retornoLogin> {
-    const { name, password } = createUser;
-
-    // Verificando se o usuário existe
-    if (await this.userModel.findOne({ name })) {
-      // Se o usuário existe, o nome e senha batem?
-      if (await this.userModel.findOne({ name, password }))
-        return {
-          login: true,
-          message: 'Acesso Garantido!',
-        };
-      else
-        return {
-          login: false,
-          message: 'Usuário ou Senha inválidos!',
-        };
-    } else
-      return {
-        login: false,
-        message: 'Usuário ou Senha inválidos!',
-      };
+  async login(): Promise<retornoLogin> {
+    // Se essa funcao for chamada, significa que o usuario foi validado com sucesso pelo passport, portanto seu username e password estao corretos.
+    return {
+      login: true,
+      message: "Acesso garantido!"
+    }
+   
   }
 
   async createReview(user: any, reviewRequest: Review): Promise<string> {
     const { idMovie, review, score, date } = reviewRequest;
-    let indexReview = user.reviews.findIndex(
+    const indexReview = user.reviews.findIndex(
       reviewUser => reviewUser.idMovie === idMovie,
     );
     // Caso já exista uma review pra esse filme, atualizar
@@ -132,7 +119,7 @@ export class UserService {
   async removeMovieWatchlist(user: any, idMovie: string): Promise<string> {
     if (user) {
       // Procura o index do filme no array watchlist
-      let indexMovieWatchlist = user.watchlist.findIndex((movie: string) => {
+      const indexMovieWatchlist = user.watchlist.findIndex((movie: string) => {
         return movie == idMovie;
       });
       if (indexMovieWatchlist !== -1) {

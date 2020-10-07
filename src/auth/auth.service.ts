@@ -8,13 +8,12 @@ export class AuthService {
         private userService: UserService,
     ) { }
 
-    async validateUser(name: string, password: string): Promise<any> {
-        console.log("oi", name)
-        const user = await this.userService.getByName( name )
+    async validateUser(username: string, password: string): Promise<any> {
+        // verificando se o usuario existe no banco de dados
+        const user = await this.userService.getByName( username )
+        // verificando se username e senha batem
         if (user && user.password === password) {
-            // ...result serve para separar o password do resto do usuario
-            const { password, ...result } = user
-            return result
+            return user
         } else return null
     }
 }

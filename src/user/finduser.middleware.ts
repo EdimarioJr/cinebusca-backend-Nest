@@ -14,11 +14,11 @@ export class FindUserMiddleware implements NestMiddleware {
         private userModel: Model<UserDocument>,
     ) { }
 
-    async use(req: Request, res: Response, next: Function) {
+    async use(req: Request, res: Response, next: any) {
         // Confere se o user(idUser) é um Object Id válido
         if (isValidObjectId(req.body.user)) {
             // Procura o usuário no BD. Caso o usuário não exista, o findById vai retornar null
-            let user = await this.userModel.findById(req.body.user)
+            const user = await this.userModel.findById(req.body.user)
             req.body.user = user
             next()
         } else {
