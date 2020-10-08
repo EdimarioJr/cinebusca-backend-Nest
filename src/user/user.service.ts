@@ -4,6 +4,8 @@ import {UserInterface} from "./interfaces/user.interface"
 import { User, UserDocument } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bcrypt = require("bcrypt")
 
 // op eh a flag que vai indicar para o front end se a operacao teve sucesso ou nao
 export interface statusOperacao{
@@ -32,7 +34,8 @@ export class UserService {
        Se o findOne acha algo, ele retorna o documento que corresponde a query, caso contrário retorna null 
        */
       if (!(await this.userModel.findOne({ name}))) {
-        const newUser = new this.userModel({ name, password });
+        const hashedPassword = await bcrypt.hash(password,10)
+        const newUser = new this.userModel({ name, password: hashedPassword });
         newUser.save();
         return {
           op: true,

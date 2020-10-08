@@ -1,8 +1,8 @@
 import {Strategy, ExtractJwt} from "passport-jwt"
 import {PassportStrategy } from "@nestjs/passport"
 import {Injectable} from "@nestjs/common"
-import {jwtConstants} from "./auth.constants"
-import {UserService} from "../user/user.service"
+import {jwtConstants} from "../auth.constants"
+import {UserService} from "../../user/user.service"
 
 // Estrategia Jwt que o passport pode usar
 

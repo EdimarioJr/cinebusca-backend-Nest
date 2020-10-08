@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Request,Param, Delete, ParseIntPipe, UseGuards, Put, ValidationPipe } from '@nestjs/common'
 import { UserService } from './user.service'
 import { CreateUserDto } from './dto/create-user-dto'
-import {LocalAuthGuard} from '../auth/local-auth.guard'
-import {JwtAuthGuard} from "../auth/jwt-auth.guard"
+import {LocalAuthGuard} from '../auth/guards/local-auth.guard'
+import {JwtAuthGuard} from "../auth/guards/jwt-auth.guard"
 import {AuthService} from "../auth/auth.service"
 import { CreateReviewDto } from './dto/create-review-dto'
 import {UpdateReviewDto} from "./dto/update-review-dto"
