@@ -23,8 +23,8 @@ export class UserService {
     private userModel: Model<UserDocument>,
   ) {}
 
-  async create(createUser: CreateUserDto): Promise<statusOperacao> {
-    const {name, password} = createUser
+  async create(name: string, password: string): Promise<statusOperacao> {
+    
     // Verificando se os dois parâmetros estão sendo mandados
     if (name && password) {
       /*
@@ -52,9 +52,8 @@ export class UserService {
     return await this.userModel.findOne({ name });
   }
 
-  async createReview(user: any, reviewRequest: Review): Promise<statusOperacao> {
+  async createReview(user: any, idMovie:number, review: string, score: number): Promise<statusOperacao> {
     if(user){
-      const { idMovie, review, score} = reviewRequest;
       // Conferindo se os parametros necessarios sao nao nulos ou strings vazias
         const indexReview = user.reviews.findIndex(
           reviewUser => reviewUser.idMovie === idMovie,

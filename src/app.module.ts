@@ -9,7 +9,7 @@ import { MongooseModule } from '@nestjs/mongoose';
   imports: [
     MongooseModule.forRoot(
       'mongodb+srv://cinebusca:xFtPBSLYzcvV8p1a@cinebusca-app.df2eu.mongodb.net/<dbCinebusca>?retryWrites=true&w=majority',
-      { useNewUrlParser: true },
+      { useNewUrlParser: true, useCreateIndex: true },
     ),
     UserModule,
     AuthModule,
