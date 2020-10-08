@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Review } from './interfaces/user.interface';
-import { CreateUserDto } from './dto/create-user-dto';
+import {UserInterface} from "./interfaces/user.interface"
 import { User, UserDocument } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -52,7 +52,7 @@ export class UserService {
     return await this.userModel.findOne({ name });
   }
 
-  async createReview(user: any, idMovie:number, review: string, score: number): Promise<statusOperacao> {
+  async createReview(user: UserInterface, idMovie:number, review: string, score: number): Promise<statusOperacao> {
     if(user){
       // Conferindo se os parametros necessarios sao nao nulos ou strings vazias
         const indexReview = user.reviews.findIndex(
@@ -94,12 +94,18 @@ export class UserService {
    
   }
 
-  async updateReview(user: any, idMovie: number, newReview: string): Promise<statusOperacao>{
+  async updateReview(user: UserInterface, idMovie: number, newReview: string): Promise<statusOperacao>{
     if(user){
       const indexMovie = user.reviews.findIndex( movie => movie.idMovie === idMovie)
       if(indexMovie !== -1){
-        user.reviews[indexMovie].review = newReview
-        user.reviews[indexMovie].date = new Date()
+        
+        user.reviews[indexMovie] = {
+          ...user.reviews[indexMovie],
+          date: new Date(),
+          review: newReview
+        }
+        // avisando a mongo que o array foi modificado
+        user.markModified("reviews")
         await user.save()
         return {
           op: true,
@@ -118,7 +124,7 @@ export class UserService {
    
   }
 
-  async getAllReviews(user: User): Promise<statusOperacao> {
+  async getAllReviews(user: UserInterface): Promise<statusOperacao> {
     if (user) {
       return {
         op: true,
@@ -131,7 +137,7 @@ export class UserService {
     }
   }
 
-  async deleteReview(user: any, idMovieReview: number): Promise<statusOperacao> {
+  async deleteReview(user: UserInterface, idMovieReview: number): Promise<statusOperacao> {
     if (user) {
       const indexReview = user.reviews.findIndex(
         review => review.idMovie === idMovieReview,
@@ -153,7 +159,7 @@ export class UserService {
     }
   }
 
-  async getWatchlist(user: User): Promise<statusOperacao> {
+  async getWatchlist(user: UserInterface): Promise<statusOperacao> {
     if (user) return {
       op: true,
       message: "Watchlist retornada!",
@@ -165,7 +171,7 @@ export class UserService {
     };
   }
 
-  async addMovieWatchlist(user: any, idMovie: number): Promise<statusOperacao> {
+  async addMovieWatchlist(user: UserInterface, idMovie: number): Promise<statusOperacao> {
     if (user) {
       // Se o filme já existe na watchlist, não faz nada
       if (user.watchlist.find((movie: number) => movie === idMovie))
@@ -188,7 +194,7 @@ export class UserService {
     };
   }
 
-  async removeMovieWatchlist(user: any, idMovie: number): Promise<statusOperacao> {
+  async removeMovieWatchlist(user: UserInterface, idMovie: number): Promise<statusOperacao> {
     if (user) {
       // Procura o index do filme no array watchlist
       const indexMovieWatchlist = user.watchlist.findIndex((movie: number) => {

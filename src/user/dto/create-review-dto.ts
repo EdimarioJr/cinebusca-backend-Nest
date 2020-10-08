@@ -1,4 +1,4 @@
-import {IsInt, IsString,IsDate} from "class-validator"
+import {IsInt, IsString} from "class-validator"
 
 export class CreateReviewDto{
     @IsInt()
@@ -10,6 +10,5 @@ export class CreateReviewDto{
     @IsInt()
     score: number;
     
-    @IsDate()
     date?: Date;
 }
