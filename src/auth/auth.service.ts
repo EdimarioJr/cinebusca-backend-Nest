@@ -16,10 +16,14 @@ export class AuthService {
         // verificando se o usuario existe no banco de dados
         const user = await this.userService.getByName(name)
         // verificando se username e senha batem
-        const isPasswordMatching = await bcrypt.compare(password,user.password)
-        if (user && isPasswordMatching) {
-            return user
-        } else return null
+        if(user){
+            const isPasswordMatching = await bcrypt.compare(password,user.password)
+            if (isPasswordMatching) {
+                return user
+            } else return null
+        }
+        
+       
     }
 
     // Essa funcao so vai ser chamada se o validateUser retornar o usuario

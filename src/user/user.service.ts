@@ -39,11 +39,11 @@ export class UserService {
         newUser.save();
         return {
           op: true,
-          message: "Usuario criado com sucesso!"
+          message: "Usuário criado com sucesso!"
         }
       } else return {
         op: false,
-        message: "Usuario ja existe!"
+        message: "Usuario já existe!"
       };
     } else return {
       op: false,
