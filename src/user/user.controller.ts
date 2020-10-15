@@ -45,7 +45,7 @@ export class UserController {
     @Post('/reviews')
     addReview(@Body(new ValidationPipe()) createReviewDto: CreateReviewDto, @Request() req) : Promise<statusOperacao>{
         const {idMovie,review,score} = createReviewDto
-        return this.userService.createReview(req.user, idMovie,review,score)
+        return this.userService.createReview(req.user, idMovie,review)
     }
 
     @UseGuards(JwtAuthGuard)

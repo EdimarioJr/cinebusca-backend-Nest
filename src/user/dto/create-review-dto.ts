@@ -7,7 +7,6 @@ export class CreateReviewDto{
     @IsString()
     review: string;
 
-    @IsInt()
     score: number;
     
     date?: Date;

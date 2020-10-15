@@ -8,7 +8,6 @@ import {Review} from '../interfaces/user.interface'
 export type UserDocument = User & Document
 @Schema()
 export class User{
-
     @Prop({required: true, unique: true})
     name: string;
     

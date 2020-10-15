@@ -55,7 +55,7 @@ export class UserService {
     return await this.userModel.findOne({ name });
   }
 
-  async createReview(user: UserInterface, idMovie:number, review: string, score: number): Promise<statusOperacao> {
+  async createReview(user: UserInterface, idMovie:number, review: string): Promise<statusOperacao> {
     if(user){
       // Conferindo se os parametros necessarios sao nao nulos ou strings vazias
         const indexReview = user.reviews.findIndex(
@@ -66,9 +66,10 @@ export class UserService {
           user.reviews[indexReview] = {
             idMovie,
             review,
-            score,
             date : new Date()
           };
+          // avisando ao mongodb que o array foi modificado
+          user.markModified('reviews')
           await user.save();
           return {
             op: true,
@@ -79,7 +80,6 @@ export class UserService {
           user.reviews.push({
             idMovie,
             review,
-            score,
             date: new Date(),
           });
           await user.save();
